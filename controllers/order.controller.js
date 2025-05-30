@@ -1,6 +1,5 @@
 const prisma = require("../config/db")
 const { processPayment } = require("../utils/paymentService")
-const { validationResult } = require("express-validator")
 const { log, logLevels } = require("../utils/logger")
 const {
 	ValidationError,
@@ -8,6 +7,7 @@ const {
 	PaymentError,
 	DatabaseError,
 } = require("../utils/errors")
+const validatePagination = require("../utils/validatePagination")
 
 const ORDER_STATUS = {
 	PENDING: "PENDING",
@@ -20,12 +20,6 @@ const PAYMENT_STATUS = {
 	PENDING: "PENDING",
 	PAID: "PAID",
 	FAILED: "FAILED",
-}
-
-const validatePagination = (page, limit) => {
-	const parsedPage = Math.max(1, parseInt(page) || 1)
-	const parsedLimit = Math.min(100, Math.max(1, parseInt(limit) || 20))
-	return { page: parsedPage, limit: parsedLimit }
 }
 
 const createOrder = async (req, res) => {

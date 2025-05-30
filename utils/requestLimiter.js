@@ -5,7 +5,6 @@ const limiter = rateLimit({
 	max: 100,
 	message: {
 		error: "Too many requests from this IP, please try again later.",
-		code: "RATE_LIMIT_EXCEEDED",
 	},
 })
 module.exports = limiter

@@ -23,130 +23,114 @@ const generateToken = (userId, email) => {
 	})
 }
 
-const register = asyncHandler(async (req, res) => {
-	const { email, password, name } = req.body
+const register = async (req, res) => {
+	try {
+		const { email, password, name } = req.body
 
-	const existingUser = await prisma.user.findUnique({
-		where: { email },
-	})
-
-	if (existingUser) {
-		log(logLevels.WARNING, "Registration attempt with existing email", {
-			email,
+		const existingUser = await prisma.user.findUnique({
+			where: { email },
 		})
-		throw new ConflictError("Email already registered")
-	}
 
-	const hashedPassword = await bcrypt.hash(password, 10)
-
-	const user = await prisma.user
-		.create({
-			data: {
+		if (existingUser) {
+			log(logLevels.WARNING, "Registration attempt with existing email", {
 				email,
-				password: hashedPassword,
-				name,
+			})
+			throw new ConflictError("Email already registered")
+		}
+
+		const hashedPassword = await bcrypt.hash(password, 10)
+
+		const user = await prisma.user
+			.create({
+				data: {
+					email,
+					password: hashedPassword,
+					name,
+				},
+			})
+			.catch((error) => {
+				throw new DatabaseError("Failed to create user")
+			})
+
+		const token = generateToken(user.id, user.email)
+
+		log(logLevels.SUCCESS, "User registered successfully", {
+			userId: user.id,
+			email: user.email,
+		})
+
+		res.status(201).json({
+			success: true,
+			message: "User registered successfully",
+			data: {
+				user: {
+					id: user.id,
+					email: user.email,
+					name: user.name,
+				},
+				token,
 			},
 		})
-		.catch((error) => {
-			throw new DatabaseError("Failed to create user")
-		})
-
-	const token = generateToken(user.id, user.email)
-
-	log(logLevels.SUCCESS, "User registered successfully", {
-		userId: user.id,
-		email: user.email,
-	})
-
-	res.status(201).json({
-		success: true,
-		message: "User registered successfully",
-		data: {
-			user: {
-				id: user.id,
-				email: user.email,
-				name: user.name,
-			},
-			token,
-		},
-	})
-})
+	} catch (error) {
+		log(logLevels.ERROR, "Error in registration", { error: error.message })
+		throw new DatabaseError("Database operation failed")
+	}
+}
 
 const login = asyncHandler(async (req, res) => {
 	const { email, password } = req.body
 
-	if (!email || !password) {
-		throw new ValidationError("Email and password are required")
-	}
+	try {
+		if (!email || !password) {
+			throw new ValidationError("Email and password are required")
+		}
 
-	const user = await prisma.user.findUnique({
-		where: { email },
-	})
-
-	if (!user) {
-		log(logLevels.WARNING, "Login attempt with non-existent email", { email })
-		throw new AuthenticationError("Invalid credentials")
-	}
-
-	const validPassword = await bcrypt.compare(password, user.password)
-
-	if (!validPassword) {
-		log(logLevels.WARNING, "Login attempt with invalid password", { email })
-		throw new AuthenticationError("Invalid credentials")
-	}
-
-	const token = generateToken(user.id, user.email)
-
-	log(logLevels.SUCCESS, "User logged in successfully", {
-		userId: user.id,
-		email: user.email,
-	})
-
-	res.json({
-		success: true,
-		message: "Login successful",
-		data: {
-			user: {
-				id: user.id,
-				email: user.email,
-				name: user.name,
-			},
-			token,
-		},
-	})
-})
-
-const getProfile = asyncHandler(async (req, res) => {
-	const user = await prisma.user.findUnique({
-		where: { id: req.user.id },
-		select: {
-			id: true,
-			email: true,
-			name: true,
-			createdAt: true,
-			updatedAt: true,
-		},
-	})
-
-	if (!user) {
-		log(logLevels.WARNING, "Profile fetch failed - user not found", {
-			userId: req.user.id,
+		const user = await prisma.user.findUnique({
+			where: { email },
 		})
-		throw new NotFoundError("User not found")
+
+		if (!user) {
+			log(logLevels.WARNING, "Login attempt with non-existent email", {
+				email,
+			})
+			throw new AuthenticationError("Invalid credentials")
+		}
+
+		const validPassword = await bcrypt.compare(password, user.password)
+
+		if (!validPassword) {
+			log(logLevels.WARNING, "Login attempt with invalid password", {
+				email,
+			})
+			throw new AuthenticationError("Invalid credentials")
+		}
+
+		const token = generateToken(user.id, user.email)
+
+		log(logLevels.SUCCESS, "User logged in successfully", {
+			userId: user.id,
+			email: user.email,
+		})
+
+		res.json({
+			success: true,
+			message: "Login successful",
+			data: {
+				user: {
+					id: user.id,
+					email: user.email,
+					name: user.name,
+				},
+				token,
+			},
+		})
+	} catch (error) {
+		log(logLevels.ERROR, "Error in login", { error: error.message })
+		throw new AuthenticationError("Authentication failed")
 	}
-
-	log(logLevels.SUCCESS, "User profile retrieved successfully", {
-		userId: user.id,
-	})
-
-	res.json({
-		success: true,
-		data: { user },
-	})
 })
 
 module.exports = {
 	register,
 	login,
-	getProfile,
 }

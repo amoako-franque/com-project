@@ -13,7 +13,8 @@ const options = {
 		servers: [
 			{
 				url: process.env.SWAGGER_SERVER_URL || "http://localhost:5879",
-				description: "Development server",
+				description:
+					"Com Project API - Com Project API - Local Development Server",
 			},
 		],
 		components: {

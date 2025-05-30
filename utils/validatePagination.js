@@ -1,7 +1,7 @@
 const validatePagination = (page, limit) => {
-	const validatedPage = Math.max(1, parseInt(page) || 1)
-	const validatedLimit = Math.min(100, Math.max(1, parseInt(limit) || 10)) // Cap at 100
-	return { page: validatedPage, limit: validatedLimit }
+	const parsedPage = Math.max(1, parseInt(page) || 1)
+	const parsedLimit = Math.min(100, Math.max(1, parseInt(limit) || 20))
+	return { page: parsedPage, limit: parsedLimit }
 }
 
 module.exports = validatePagination
