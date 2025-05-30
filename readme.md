@@ -11,6 +11,7 @@ A simple and secure e-commerce RESTful API built with Node.js, Express, and Post
 - 📝 API documentation with Swagger
 - 🛡️ Security features (Helmet, Rate Limiting)
 - 📊 PostgreSQL database with Prisma ORM
+- 🐳 Docker support for easy deployment
 
 ## Tech Stack
 
@@ -23,14 +24,18 @@ A simple and secure e-commerce RESTful API built with Node.js, Express, and Post
 - Express Validator for request validation
 - Helmet for security headers
 - Rate limiting for API protection
+- Docker & Docker Compose
 
 ## Prerequisites
 
 - Node.js (v14 or higher)
 - PostgreSQL
 - npm or yarn
+- Docker and Docker Compose (for containerized deployment)
 
 ## Setup Instructions
+
+### Option 1: Local Development Setup
 
 1. Clone the repository:
 
@@ -63,7 +68,6 @@ JWT_SECRET_EXPIRES_IN=7d
 
 # Swagger
 SWAGGER_SERVER_URL
-
 ```
 
 4. Set up the database:
@@ -86,7 +90,34 @@ npm run start:dev
 npm start
 ```
 
-The server will start on http://localhost:5879 (or the port specified in your .env file)
+### Option 2: Docker Setup
+
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd com-project
+```
+
+2. Create a `.env` file in the root directory (same as above)
+
+3. Build and start the containers:
+
+```bash
+# Build and start all services
+docker compose up --build
+
+# Run in detached mode
+docker compose up -d
+
+# Stop the containers
+docker compose down
+```
+
+The application will be available at:
+- API: http://localhost:5879
+- Swagger Documentation: http://localhost:5879/api-docs
+- PostgreSQL Database: localhost:5432
 
 ## API Documentation
 
@@ -108,6 +139,8 @@ http://localhost:5879/api-docs
 ├── swagger/        # API documentation
 ├── utils/          # Utility functions
 ├── server.js       # Application entry point
+├── Dockerfile      # Docker configuration
+├── docker-compose.yml # Docker Compose configuration
 └── package.json    # Project dependencies
 ```
 
@@ -143,6 +176,27 @@ To create a new migration after modifying the Prisma schema:
 
 ```bash
 npm run migrate
+```
+
+## Docker Commands
+
+Useful Docker commands for development:
+
+```bash
+# View running containers
+docker compose ps
+
+# View logs
+docker compose logs -f
+
+# Rebuild a specific service
+docker compose up -d --build app
+
+# Access container shell
+docker compose exec app sh
+
+# Access database shell
+docker compose exec db psql -U postgres
 ```
 
 ## License
