@@ -1,0 +1,65 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+    PENDING
+    COMPLETED
+    FAILED
+    CANCELLED
+}
+
+enum PaymentStatus {
+    PENDING
+    PAID
+    FAILED
+}
+
+model User {
+    id        String   @id @default(uuid())
+    name      String
+    email     String   @unique
+    password  String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    orders    Order[]
+}
+
+model Product {
+    id          String      @id @default(uuid())
+    name        String
+    price       Decimal     @db.Decimal(10, 2)
+    stock       Int
+    description String?
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    orderItems  OrderItem[]
+}
+
+model Order {
+    id                          String        @id @default(uuid())
+    userId                      String
+    user                        User          @relation(fields: [userId], references: [id])
+    totalAmount                 Decimal       @db.Decimal(10, 2)
+    status                      OrderStatus   @default(PENDING)
+    paymentStatus               PaymentStatus @default(PENDING)
+    paymentGatewayTransactionId String?
+    createdAt                   DateTime      @default(now())
+    updatedAt                   DateTime      @updatedAt
+    orderItems                  OrderItem[]
+}
+
+model OrderItem {
+    id           String  @id @default(uuid())
+    orderId      String
+    order        Order   @relation(fields: [orderId], references: [id])
+    productId    String
+    product      Product @relation(fields: [productId], references: [id])
+    quantity     Int
+    priceAtOrder Decimal @db.Decimal(10, 2)
+}
