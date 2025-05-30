@@ -67,7 +67,8 @@ JWT_SECRET_AUDIENCE=localhost
 JWT_SECRET_EXPIRES_IN=7d
 
 # Swagger
-SWAGGER_SERVER_URL
+SWAGGER_SERVER_URL=http://localhost:5879
+
 ```
 
 4. Set up the database:
@@ -100,7 +101,6 @@ cd com-project
 ```
 
 2. Create a `.env` file in the root directory (same as above)
-
 3. Build and start the containers:
 
 ```bash
@@ -115,6 +115,7 @@ docker compose down
 ```
 
 The application will be available at:
+
 - API: http://localhost:5879
 - Swagger Documentation: http://localhost:5879/api-docs
 - PostgreSQL Database: localhost:5432
