@@ -1,4 +1,4 @@
-# E-commerce REST API
+# Com Project REST API
 
 A robust and secure e-commerce RESTful API built with Node.js, Express, and PostgreSQL. This API provides endpoints for user management, product catalog, and order processing.
 
